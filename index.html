@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfect AI🤖</title>
+    <link rel="stylesheet" href="https://pyscript.net/1.0.0/pyscript.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,12 +69,41 @@
         <div id="error" class="error"></div>
     </div>
 
+    <py-script>
+        from spellchecker import SpellChecker
+
+        def correct_spelling(query):
+            spell = SpellChecker()
+            corrected_query = ' '.join([spell.candidates(word).pop() if spell.unknown([word]) else word for word in query.split()])
+            return corrected_query
+
+        def extract_keywords(query):
+            synonyms = {
+                "where is": ["location of", "where's"],
+                "what is": ["define", "describe", "what's"],
+                "who is": ["identify", "who's"],
+                "how about": ["details on", "info about", "consider"]
+            }
+
+            query = query.lower().strip()
+
+            for key, values in synonyms.items():
+                if any(val in query for val in values):
+                    query = query.replace(next(val for val in values if val in query), '').strip()
+                    break
+
+            return query
+    </py-script>
+
+    <script src="https://pyscript.net/1.0.0/pyscript.js"></script>
     <script>
-        function searchWikipedia() {
+        async function searchWikipedia() {
             const query = document.getElementById('queryInput').value.trim();
 
-            // Extract the main keywords from the query
-            let formattedQuery = extractKeywords(query);
+            // Call Python function to correct spelling
+            const { correct_spelling, extract_keywords } = pyscript.python;
+            const correctedQuery = await pyscript.call('correct_spelling', query);
+            const formattedQuery = await pyscript.call('extract_keywords', correctedQuery);
 
             // If no valid query is detected, show an error
             if (!formattedQuery) {
@@ -85,40 +115,18 @@
             document.getElementById('error').textContent = '';
 
             // Fetch Wikipedia API
-            fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.type === 'disambiguation' || data.title === 'Not found.') {
-                        document.getElementById('result').textContent = 'No results found, please refine your query.';
-                    } else {
-                        document.getElementById('result').innerHTML = `<h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more</a>`;
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('error').textContent = 'An error occurred while fetching data. Please try again.';
-                });
-        }
+            try {
+                const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`);
+                const data = await response.json();
 
-        function extractKeywords(query) {
-            // Synonym mapping
-            const synonyms = {
-                "where is": ["location of", "where's"],
-                "what is": ["define", "describe", "what's"],
-                "who is": ["identify", "who's"],
-                "how about": ["details on", "info about", "consider"]
-            };
-
-            // Normalize and extract keywords
-            query = query.toLowerCase().trim();
-
-            for (const [key, values] of Object.entries(synonyms)) {
-                if (values.some(val => query.startsWith(val))) {
-                    query = query.replace(new RegExp(`^(${values.join("|")})\\s+`), '');
-                    break;
+                if (data.type === 'disambiguation' || data.title === 'Not found.') {
+                    document.getElementById('result').textContent = 'No results found, please refine your query.';
+                } else {
+                    document.getElementById('result').innerHTML = `<h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more</a>`;
                 }
+            } catch (error) {
+                document.getElementById('error').textContent = 'An error occurred while fetching data. Please try again.';
             }
-
-            return query;
         }
     </script>
 </body>
