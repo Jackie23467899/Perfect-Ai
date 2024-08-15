@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfect AI🤖</title>
+    <title>Perfet AI🤖</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
             padding: 20px;
-            margin: 0;
         }
 
         .container {
@@ -61,7 +60,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Perfect AI🤖</h1>
+        <h1>Perfet AI🤖</h1>
         <input type="text" id="queryInput" placeholder="Ask anything..." />
         <button onclick="searchWikipedia()">Search</button>
         <div id="result" class="result"></div>
@@ -85,13 +84,13 @@
             document.getElementById('error').textContent = '';
 
             // Fetch Wikipedia API
-            fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`)
+            fetch(https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)})
                 .then(response => response.json())
                 .then(data => {
                     if (data.type === 'disambiguation' || data.title === 'Not found.') {
                         document.getElementById('result').textContent = 'No results found, please refine your query.';
                     } else {
-                        document.getElementById('result').innerHTML = `<h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more</a>`;
+                        document.getElementById('result').innerHTML = <h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more</a>;
                     }
                 })
                 .catch(error => {
@@ -102,7 +101,7 @@
         function extractKeywords(query) {
             // Remove question phrases like "where is," "what is," etc.
             query = query.toLowerCase()
-                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for|define|describe)\s+/, '')
+                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for)\s+/, '')
                          .trim();
 
             return query;
