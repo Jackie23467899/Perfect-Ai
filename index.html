@@ -70,14 +70,15 @@
     </div>
 
     <py-script>
-        from spellchecker import SpellChecker
+        from pyspellchecker import SpellChecker
 
-        def correct_spelling(query):
+        def correct_spelling(query: str) -> str:
             spell = SpellChecker()
-            corrected_query = ' '.join([spell.candidates(word).pop() if spell.unknown([word]) else word for word in query.split()])
-            return corrected_query
+            words = query.split()
+            corrected_words = [spell.candidates(word).pop() if spell.unknown([word]) else word for word in words]
+            return ' '.join(corrected_words)
 
-        def extract_keywords(query):
+        def extract_keywords(query: str) -> str:
             synonyms = {
                 "where is": ["location of", "where's"],
                 "what is": ["define", "describe", "what's"],
@@ -101,9 +102,8 @@
             const query = document.getElementById('queryInput').value.trim();
 
             // Call Python function to correct spelling
-            const { correct_spelling, extract_keywords } = pyscript.python;
-            const correctedQuery = await pyscript.call('correct_spelling', query);
-            const formattedQuery = await pyscript.call('extract_keywords', correctedQuery);
+            const correctedQuery = await pyscript.runPython('correct_spelling', {query});
+            const formattedQuery = await pyscript.runPython('extract_keywords', {query: correctedQuery});
 
             // If no valid query is detected, show an error
             if (!formattedQuery) {
