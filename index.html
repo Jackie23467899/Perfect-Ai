@@ -100,23 +100,10 @@
         }
 
         function extractKeywords(query) {
-            // Synonym mapping
-            const synonyms = {
-                "where is": ["location of", "where's"],
-                "what is": ["define", "describe", "what's"],
-                "who is": ["identify", "who's"],
-                "how about": ["details on", "info about", "consider"]
-            };
-
-            // Normalize and extract keywords
-            query = query.toLowerCase().trim();
-
-            for (const [key, values] of Object.entries(synonyms)) {
-                if (values.some(val => query.startsWith(val))) {
-                    query = query.replace(new RegExp(`^(${values.join("|")})\\s+`), '');
-                    break;
-                }
-            }
+            // Remove question phrases like "where is," "what is," etc.
+            query = query.toLowerCase()
+                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for|define|describe)\s+/, '')
+                         .trim();
 
             return query;
         }
