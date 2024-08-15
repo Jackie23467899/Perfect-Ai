@@ -6,29 +6,54 @@
     <title>Perfet AI🤖</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            padding: 40px;
+            background-color: #282c34;
+            color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
         }
         input[type="text"] {
-            padding: 10px;
+            padding: 15px;
             font-size: 16px;
-            width: 300px;
+            width: 350px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
         }
         button {
-            padding: 10px;
+            padding: 15px 20px;
             font-size: 16px;
             cursor: pointer;
-            margin-left: 10px;
+            background-color: #61dafb;
+            color: #282c34;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #21a1f1;
         }
         #output {
-            margin-top: 20px;
-            font-size: 18px;
-            background-color: #fff;
-            padding: 10px;
-            border: 1px solid #ccc;
+            margin-top: 30px;
+            font-size: 1.1em;
+            background-color: #333842;
+            padding: 20px;
             border-radius: 5px;
             max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -48,7 +73,9 @@
             const queryType = query.split(' ')[0].toLowerCase();
             const searchTerm = query.replace(/^(what is|where is|how about|who is)\s+/i, '');
 
-            if (searchTerm) {
+            if (queryType === 'how' && searchTerm.toLowerCase() === 'are you') {
+                document.getElementById('output').innerText = "I'm just a bunch of code, but thanks for asking! How can I help you today?";
+            } else if (searchTerm) {
                 fetchWikipediaData(searchTerm, queryType);
             } else {
                 document.getElementById('output').innerText = 'Please enter a valid query.';
@@ -89,7 +116,6 @@
         }
 
         function extractWhereInformation(text) {
-            // Simple method to look for "located" or similar words in the text
             const locationKeywords = ['located', 'situated', 'found in', 'place'];
             const sentences = text.split('.');
             for (let sentence of sentences) {
