@@ -60,7 +60,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Perfect AI🤖</h1>
+        <h1>Perfet AI🤖</h1>
         <input type="text" id="queryInput" placeholder="Ask anything..." />
         <button onclick="searchWikipedia()">Search</button>
         <div id="result" class="result"></div>
@@ -70,20 +70,11 @@
     <script>
         function searchWikipedia() {
             const query = document.getElementById('queryInput').value.trim();
-            let formattedQuery = query;
 
-            // Handle different types of queries
-            if (query.toLowerCase().startsWith('what is')) {
-                formattedQuery = query.replace(/what is/i, '').trim();
-            } else if (query.toLowerCase().startsWith('who is')) {
-                formattedQuery = query.replace(/who is/i, '').trim();
-            } else if (query.toLowerCase().startsWith('where is')) {
-                formattedQuery = query.replace(/where is/i, '').trim();
-            } else if (query.toLowerCase().startsWith('how about')) {
-                formattedQuery = query.replace(/how about/i, '').trim();
-            }
+            // Extract the main keywords from the query
+            let formattedQuery = extractKeywords(query);
 
-            // If no valid query type is detected, show an error
+            // If no valid query is detected, show an error
             if (!formattedQuery) {
                 document.getElementById('error').textContent = 'Please ask a valid question.';
                 document.getElementById('result').textContent = '';
@@ -105,6 +96,15 @@
                 .catch(error => {
                     document.getElementById('error').textContent = 'An error occurred while fetching data. Please try again.';
                 });
+        }
+
+        function extractKeywords(query) {
+            // Remove question phrases like "where is," "what is," etc.
+            query = query.toLowerCase()
+                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for)\s+/, '')
+                         .trim();
+
+            return query;
         }
     </script>
 </body>
