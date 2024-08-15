@@ -7,105 +7,101 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            padding: 20px;
             background-color: #f4f4f4;
-            color: #333;
-            padding: 20px;
         }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #444;
-        }
-
-        input[type="text"], button {
-            width: calc(100% - 40px);
+        input[type="text"] {
             padding: 10px;
-            margin: 10px 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
             font-size: 16px;
+            width: 300px;
         }
-
         button {
-            background-color: #007bff;
-            color: white;
+            padding: 10px;
+            font-size: 16px;
             cursor: pointer;
+            margin-left: 10px;
         }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .result {
+        #output {
             margin-top: 20px;
-            padding: 20px;
-            background-color: #e9ecef;
-            border-radius: 10px;
-        }
-
-        .error {
-            color: red;
-            text-align: center;
+            font-size: 18px;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 600px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Perfet AI🤖</h1>
-        <input type="text" id="queryInput" placeholder="Ask anything..." />
-        <button onclick="searchWikipedia()">Search</button>
-        <div id="result" class="result"></div>
-        <div id="error" class="error"></div>
-    </div>
+
+    <h1>Perfet AI🤖</h1>
+    <p>Enter a query starting with "What is," "Where is," "How about," or "Who is":</p>
+
+    <input type="text" id="query" placeholder="Enter your query">
+    <button onclick="handleQuery()">Search</button>
+
+    <div id="output"></div>
 
     <script>
-        function searchWikipedia() {
-            const query = document.getElementById('queryInput').value.trim();
+        function handleQuery() {
+            const query = document.getElementById('query').value;
+            const queryType = query.split(' ')[0].toLowerCase();
+            const searchTerm = query.replace(/^(what is|where is|how about|who is)\s+/i, '');
 
-            // Extract the main keywords from the query
-            let formattedQuery = extractKeywords(query);
-
-            // If no valid query is detected, show an error
-            if (!formattedQuery) {
-                document.getElementById('error').textContent = 'Please ask a valid question.';
-                document.getElementById('result').textContent = '';
-                return;
+            if (searchTerm) {
+                fetchWikipediaData(searchTerm, queryType);
+            } else {
+                document.getElementById('output').innerText = 'Please enter a valid query.';
             }
+        }
 
-            document.getElementById('error').textContent = '';
+        function fetchWikipediaData(searchTerm, queryType) {
+            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`;
 
-            // Fetch Wikipedia API
-            fetch(https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)})
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.type === 'disambiguation' || data.title === 'Not found.') {
-                        document.getElementById('result').textContent = 'No results found, please refine your query.';
+                    if (data.extract) {
+                        let result;
+                        switch (queryType) {
+                            case 'what':
+                            case 'who':
+                                result = data.extract.split('.')[0] + '.';
+                                break;
+                            case 'where':
+                                result = extractWhereInformation(data.extract);
+                                break;
+                            case 'how':
+                                result = data.extract;
+                                break;
+                            default:
+                                result = 'Query type not recognized.';
+                        }
+                        document.getElementById('output').innerText = result;
                     } else {
-                        document.getElementById('result').innerHTML = <h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more</a>;
+                        document.getElementById('output').innerText = 'Article not found.';
                     }
                 })
                 .catch(error => {
-                    document.getElementById('error').textContent = 'An error occurred while fetching data. Please try again.';
+                    console.error('Error fetching the Wikipedia article:', error);
+                    document.getElementById('output').innerText = 'An error occurred. Please try again.';
                 });
         }
 
-        function extractKeywords(query) {
-            // Remove question phrases like "where is," "what is," etc.
-            query = query.toLowerCase()
-                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for)\s+/, '')
-                         .trim();
-
-            return query;
+        function extractWhereInformation(text) {
+            // Simple method to look for "located" or similar words in the text
+            const locationKeywords = ['located', 'situated', 'found in', 'place'];
+            const sentences = text.split('.');
+            for (let sentence of sentences) {
+                for (let keyword of locationKeywords) {
+                    if (sentence.toLowerCase().includes(keyword)) {
+                        return sentence.trim() + '.';
+                    }
+                }
+            }
+            return sentences[0] + '.';
         }
     </script>
+
 </body>
 </html>
