@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfet AI🤖</title>
+    <title>Perfect AI🤖</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
             padding: 20px;
+            margin: 0;
         }
 
         .container {
@@ -60,7 +61,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Perfet AI🤖</h1>
+        <h1>Perfect AI🤖</h1>
         <input type="text" id="queryInput" placeholder="Ask anything..." />
         <button onclick="searchWikipedia()">Search</button>
         <div id="result" class="result"></div>
@@ -99,10 +100,23 @@
         }
 
         function extractKeywords(query) {
-            // Remove question phrases like "where is," "what is," etc.
-            query = query.toLowerCase()
-                         .replace(/^(where is|what is|who is|how about|tell me about|find|search for)\s+/, '')
-                         .trim();
+            // Synonym mapping
+            const synonyms = {
+                "where is": ["location of", "where's"],
+                "what is": ["define", "describe", "what's"],
+                "who is": ["identify", "who's"],
+                "how about": ["details on", "info about", "consider"]
+            };
+
+            // Normalize and extract keywords
+            query = query.toLowerCase().trim();
+
+            for (const [key, values] of Object.entries(synonyms)) {
+                if (values.some(val => query.startsWith(val))) {
+                    query = query.replace(new RegExp(`^(${values.join("|")})\\s+`), '');
+                    break;
+                }
+            }
 
             return query;
         }
