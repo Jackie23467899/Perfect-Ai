@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wikipedia Query with PyScript</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Wikipedia Query with PyScript</h1>
+    <input type="text" id="query" placeholder="Enter your query">
+    <button onclick="queryWikipedia()">Search</button>
+
+    <div id="result"></div>
+
+    <!-- PyScript block to handle the Wikipedia query -->
+    <py-script>
+        import asyncio
+        from pyscript import Element
+        import wikipedia
+
+        async def queryWikipedia():
+            query = Element('query').value
+            result_div = Element('result')
+            if query:
+                try:
+                    summary = wikipedia.summary(query, sentences=2)
+                    result_div.write(f"<h3>Result:</h3><p>{summary}</p>")
+                except wikipedia.exceptions.DisambiguationError as e:
+                    result_div.write(f"<h3>Disambiguation Error:</h3><p>Multiple results found. Please be more specific.</p><p>Options: {', '.join(e.options)}</p>")
+                except wikipedia.exceptions.PageError:
+                    result_div.write(f"<h3>Page Error:</h3><p>The page does not exist.</p>")
+                except Exception as e:
+                    result_div.write(f"<h3>Error:</h3><p>{str(e)}</p>")
+            else:
+                result_div.write("<h3>Error:</h3><p>Please enter a query.</p>")
+    </py-script>
+
+</body>
+</html>
