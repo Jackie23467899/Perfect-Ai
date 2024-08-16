@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markov Chain Story Generator</title>
+    <title>Perfet AI🤖</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -20,6 +20,18 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            padding: 15px;
+            font-size: 16px;
+            width: 350px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
         }
         button {
             padding: 15px 20px;
@@ -47,12 +59,16 @@
 </head>
 <body>
 
-    <h1>Markov Chain Story Generator</h1>
-    <button onclick="generateStory()">Generate Story</button>
+    <h1>Perfet AI🤖</h1>
+    <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
+
+    <input type="text" id="query" placeholder="Enter your query">
+    <button onclick="handleQuery()">Search</button>
 
     <div id="output"></div>
 
     <script>
+        // Load the story corpus from a text file
         async function fetchStoryCorpus() {
             try {
                 const response = await fetch('story-corpus.txt'); // Path to your text file
@@ -65,6 +81,74 @@
             }
         }
 
+        // Function to handle user queries
+        async function handleQuery() {
+            const query = document.getElementById('query').value.trim().toLowerCase();
+            const queryType = query.split(' ')[0];
+            const searchTerm = query.replace(/^(what is|where is|how about|who is|tell me a story)\s+/i, '');
+
+            if (query === 'how are you') {
+                document.getElementById('output').innerText = "I'm good! How can I assist you today?";
+            } else if (query === 'who are you') {
+                document.getElementById('output').innerText = "I'm Perfet AI, here to help with your queries and generate stories.";
+            } else if (query.startsWith('tell me a story')) {
+                generateStory();
+            } else if (searchTerm) {
+                fetchWikipediaData(searchTerm, queryType);
+            } else {
+                document.getElementById('output').innerText = 'Please enter a valid query.';
+            }
+        }
+
+        // Function to fetch data from Wikipedia
+        async function fetchWikipediaData(searchTerm, queryType) {
+            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.extract) {
+                    let result;
+                    switch (queryType) {
+                        case 'what':
+                        case 'who':
+                            result = data.extract.split('.')[0] + '.';
+                            break;
+                        case 'where':
+                            result = extractWhereInformation(data.extract);
+                            break;
+                        case 'how':
+                            result = data.extract;
+                            break;
+                        default:
+                            result = 'Query type not recognized.';
+                    }
+                    document.getElementById('output').innerText = result;
+                } else {
+                    document.getElementById('output').innerText = 'Article not found.';
+                }
+            } catch (error) {
+                console.error('Error fetching the Wikipedia article:', error);
+                document.getElementById('output').innerText = 'An error occurred. Please try again.';
+            }
+        }
+
+        // Function to extract location-related information from text
+        function extractWhereInformation(text) {
+            const locationKeywords = ['located', 'situated', 'found in', 'place'];
+            const sentences = text.split('.');
+            for (let sentence of sentences) {
+                for (let keyword of locationKeywords) {
+                    if (sentence.toLowerCase().includes(keyword)) {
+                        return sentence.trim() + '.';
+                    }
+                }
+            }
+            return sentences[0] + '.';
+        }
+
+        // Function to generate a story using Markov Chains
         async function generateStory() {
             const corpus = await fetchStoryCorpus();
             if (!corpus) return;
@@ -82,6 +166,7 @@
             document.getElementById('output').innerText = story.join(' ');
         }
 
+        // Function to build the Markov Chain model
         function buildMarkovChain(words) {
             const markovChain = {};
             for (let i = 0; i < words.length - 1; i++) {
