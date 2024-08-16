@@ -93,6 +93,10 @@
             query = document.getElementById('query').value.strip().lower()
             if query.startswith('tell me a story'):
                 update_story()
+            elif query == 'how are you':
+                document.getElementById('output').innerText = "I'm good! How can I assist you today?";
+            elif query == 'who are you':
+                document.getElementById('output').innerText = "I'm Perfet AI, here to help with your queries and generate stories.";
             else:
                 document.getElementById('output').innerText = 'Please enter a valid query.'
 
