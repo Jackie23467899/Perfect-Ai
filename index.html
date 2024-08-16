@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfet AI🤖</title>
+    <title>Markov Chain Story Generator</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -20,18 +20,6 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-        }
-        input[type="text"] {
-            padding: 15px;
-            font-size: 16px;
-            width: 350px;
-            border: none;
-            border-radius: 5px;
-            margin-right: 10px;
         }
         button {
             padding: 15px 20px;
@@ -59,108 +47,52 @@
 </head>
 <body>
 
-    <h1>Perfet AI🤖</h1>
-    <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
-
-    <input type="text" id="query" placeholder="Enter your query">
-    <button onclick="handleQuery()">Search</button>
+    <h1>Markov Chain Story Generator</h1>
+    <button onclick="generateStory()">Generate Story</button>
 
     <div id="output"></div>
 
     <script>
-        const COHERE_API_KEY = 'ujYgX0n9JbI0UbrANOMnIdEHVQ0aYaMsktMlzII7'; // Replace with your actual Cohere API key
-
-        async function handleQuery() {
-            const query = document.getElementById('query').value.trim().toLowerCase();
-            const queryType = query.split(' ')[0];
-            const searchTerm = query.replace(/^(what is|where is|how about|who is|tell me a story)\s+/i, '');
-
-            if (query === 'how are you') {
-                document.getElementById('output').innerText = "I'm good! How can I assist you today?";
-            } else if (query === 'who are you') {
-                document.getElementById('output').innerText = "I'm Perfet AI, here to help with your queries and generate stories.";
-            } else if (query.startsWith('tell me a story')) {
-                generateStory();
-            } else if (searchTerm) {
-                fetchWikipediaData(searchTerm, queryType);
-            } else {
-                document.getElementById('output').innerText = 'Please enter a valid query.';
-            }
-        }
-
-        async function fetchWikipediaData(searchTerm, queryType) {
-            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`;
-
+        async function fetchStoryCorpus() {
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.extract) {
-                    let result;
-                    switch (queryType) {
-                        case 'what':
-                        case 'who':
-                            result = data.extract.split('.')[0] + '.';
-                            break;
-                        case 'where':
-                            result = extractWhereInformation(data.extract);
-                            break;
-                        case 'how':
-                            result = data.extract;
-                            break;
-                        default:
-                            result = 'Query type not recognized.';
-                    }
-                    document.getElementById('output').innerText = result;
-                } else {
-                    document.getElementById('output').innerText = 'Article not found.';
-                }
+                const response = await fetch('story-corpus.txt'); // Path to your text file
+                if (!response.ok) throw new Error('Network response was not ok');
+                const text = await response.text();
+                return text;
             } catch (error) {
-                console.error('Error fetching the Wikipedia article:', error);
-                document.getElementById('output').innerText = 'An error occurred. Please try again.';
+                console.error('Error fetching the story corpus:', error);
+                document.getElementById('output').innerText = 'Failed to load story corpus.';
             }
-        }
-
-        function extractWhereInformation(text) {
-            const locationKeywords = ['located', 'situated', 'found in', 'place'];
-            const sentences = text.split('.');
-            for (let sentence of sentences) {
-                for (let keyword of locationKeywords) {
-                    if (sentence.toLowerCase().includes(keyword)) {
-                        return sentence.trim() + '.';
-                    }
-                }
-            }
-            return sentences[0] + '.';
         }
 
         async function generateStory() {
-            const prompt = "Generate a short story with an interesting plot.";
-            
-            try {
-                const response = await fetch('https://api.cohere.ai/v1/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${COHERE_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: 'command-r+',
-                        prompt: prompt,
-                        max_tokens: 200
-                    })
-                });
-                
-                const data = await response.json();
-                if (data && data.generations && data.generations.length > 0) {
-                    document.getElementById('output').innerText = data.generations[0].text;
-                } else {
-                    document.getElementById('output').innerText = 'Sorry, I couldn\'t generate a story this time.';
-                }
-            } catch (error) {
-                console.error('Error generating the story:', error);
-                document.getElementById('output').innerText = 'An error occurred while generating the story. Please try again.';
+            const corpus = await fetchStoryCorpus();
+            if (!corpus) return;
+
+            const words = corpus.split(/\s+/);
+            const markovChain = buildMarkovChain(words);
+            let currentWord = words[Math.floor(Math.random() * words.length)];
+            let story = [currentWord];
+            for (let i = 0; i < 50; i++) {
+                const nextWords = markovChain[currentWord] || [];
+                if (nextWords.length === 0) break;
+                currentWord = nextWords[Math.floor(Math.random() * nextWords.length)];
+                story.push(currentWord);
             }
+            document.getElementById('output').innerText = story.join(' ');
+        }
+
+        function buildMarkovChain(words) {
+            const markovChain = {};
+            for (let i = 0; i < words.length - 1; i++) {
+                const word = words[i];
+                const nextWord = words[i + 1];
+                if (!markovChain[word]) {
+                    markovChain[word] = [];
+                }
+                markovChain[word].push(nextWord);
+            }
+            return markovChain;
         }
     </script>
 
