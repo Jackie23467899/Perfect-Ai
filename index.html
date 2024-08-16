@@ -59,7 +59,7 @@
 </head>
 <body>
 
-    <h1>Perfet AI🤖</h1>
+    <h1>Perfet AI🤖d</h1>
     <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
 
     <input type="text" id="query" placeholder="Enter your query">
@@ -70,9 +70,8 @@
     <script>
         // Your corpus of text for generating stories
         const storyCorpus = `
-            Once upon a time, in a land far, far away, there was a small village with a hidden secret...
-            In a bustling city, a young detective uncovered clues leading to an ancient mystery...
-            On a remote island, a group of adventurers stumbled upon a map that changed their fate...
+            In a land far, far away, there was a kingdom where magic was common and adventure was abundant...
+            The forest was enchanted, and many travelers had come seeking its hidden treasures and ancient secrets...
             ...
 
             `;
@@ -103,7 +102,10 @@
         }
 
         function generateStory() {
-            return markovChain(storyCorpus, 100); // Generate a story with 100 words
+            // Generate a story with a fixed beginning
+            const fixedBeginning = "Once upon a time, ";
+            const generatedContent = markovChain(storyCorpus, 100); // Generate the rest of the story with 100 words
+            return fixedBeginning + generatedContent;
         }
 
         async function handleQuery() {
