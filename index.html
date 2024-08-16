@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfet AI🤖</title>
+    <title>Perfect AI🤖</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -59,7 +59,7 @@
 </head>
 <body>
 
-    <h1>Perfet AI🤖</h1>
+    <h1>Perfect AI🤖</h1>
     <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
 
     <input type="text" id="query" placeholder="Enter your query">
@@ -68,20 +68,44 @@
     <div id="output"></div>
 
     <script>
-        // Load the story corpus from a text file
-        async function fetchStoryCorpus() {
-            try {
-                const response = await fetch('story-corpus.txt'); // Path to your text file
-                if (!response.ok) throw new Error('Network response was not ok');
-                const text = await response.text();
-                return text;
-            } catch (error) {
-                console.error('Error fetching the story corpus:', error);
-                document.getElementById('output').innerText = 'Failed to load story corpus.';
+        // Your corpus of text for generating stories
+        const storyCorpus = `
+            Once upon a time, in a land far, far away, there was a small village with a hidden secret...
+            In a bustling city, a young detective uncovered clues leading to an ancient mystery...
+            On a remote island, a group of adventurers stumbled upon a map that changed their fate...
+            ...
+
+            `;
+
+        // Simple Markov Chain generator
+        function markovChain(corpus, length) {
+            const words = corpus.split(/\s+/);
+            const wordMap = {};
+            words.forEach((word, index) => {
+                if (index < words.length - 1) {
+                    const nextWord = words[index + 1];
+                    if (!wordMap[word]) {
+                        wordMap[word] = [];
+                    }
+                    wordMap[word].push(nextWord);
+                }
+            });
+
+            let currentWord = 'Once';
+            let result = [currentWord];
+            while (result.length < length) {
+                const nextWords = wordMap[currentWord];
+                if (!nextWords) break;
+                currentWord = nextWords[Math.floor(Math.random() * nextWords.length)];
+                result.push(currentWord);
             }
+            return result.join(' ');
         }
 
-        // Function to handle user queries
+        function generateStory() {
+            return markovChain(storyCorpus, 100); // Generate a story with 100 words
+        }
+
         async function handleQuery() {
             const query = document.getElementById('query').value.trim().toLowerCase();
             const queryType = query.split(' ')[0];
@@ -92,7 +116,8 @@
             } else if (query === 'who are you') {
                 document.getElementById('output').innerText = "I'm Perfet AI, here to help with your queries and generate stories.";
             } else if (query.startsWith('tell me a story')) {
-                generateStory();
+                const story = generateStory();
+                document.getElementById('output').innerText = story;
             } else if (searchTerm) {
                 fetchWikipediaData(searchTerm, queryType);
             } else {
@@ -100,7 +125,6 @@
             }
         }
 
-        // Function to fetch data from Wikipedia
         async function fetchWikipediaData(searchTerm, queryType) {
             const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`;
 
@@ -134,7 +158,6 @@
             }
         }
 
-        // Function to extract location-related information from text
         function extractWhereInformation(text) {
             const locationKeywords = ['located', 'situated', 'found in', 'place'];
             const sentences = text.split('.');
@@ -146,38 +169,6 @@
                 }
             }
             return sentences[0] + '.';
-        }
-
-        // Function to generate a story using Markov Chains
-        async function generateStory() {
-            const corpus = await fetchStoryCorpus();
-            if (!corpus) return;
-
-            const words = corpus.split(/\s+/);
-            const markovChain = buildMarkovChain(words);
-            let currentWord = words[Math.floor(Math.random() * words.length)];
-            let story = [currentWord];
-            for (let i = 0; i < 50; i++) {
-                const nextWords = markovChain[currentWord] || [];
-                if (nextWords.length === 0) break;
-                currentWord = nextWords[Math.floor(Math.random() * nextWords.length)];
-                story.push(currentWord);
-            }
-            document.getElementById('output').innerText = story.join(' ');
-        }
-
-        // Function to build the Markov Chain model
-        function buildMarkovChain(words) {
-            const markovChain = {};
-            for (let i = 0; i < words.length - 1; i++) {
-                const word = words[i];
-                const nextWord = words[i + 1];
-                if (!markovChain[word]) {
-                    markovChain[word] = [];
-                }
-                markovChain[word].push(nextWord);
-            }
-            return markovChain;
         }
     </script>
 
