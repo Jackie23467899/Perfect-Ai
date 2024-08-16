@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfect AI🤖</title>
+    <title>Perfet AI🤖</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -59,8 +59,8 @@
 </head>
 <body>
 
-    <h1>Perfet AI🤖</h1>
-    <p>Enter a query starting with "What is," "Where is," "How about," or "Who is":</p>
+    <h1>Perfect AI🤖</h1>
+    <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
 
     <input type="text" id="query" placeholder="Enter your query">
     <button onclick="handleQuery()">Search</button>
@@ -69,12 +69,16 @@
 
     <script>
         function handleQuery() {
-            const query = document.getElementById('query').value;
-            const queryType = query.split(' ')[0].toLowerCase();
+            const query = document.getElementById('query').value.trim().toLowerCase();
+            const queryType = query.split(' ')[0];
             const searchTerm = query.replace(/^(what is|where is|how about|who is)\s+/i, '');
 
-            if (queryType === 'how' && searchTerm.toLowerCase() === 'are you') {
-                document.getElementById('output').innerText = "I'm just a bunch of code, but thanks for asking! How can I help you today?";
+            if (query === 'how are you') {
+                document.getElementById('output').innerText = "I'm Good, I helping people that needed to research, like you. how can i help?";
+            } else if (query === 'who are you') {
+                document.getElementById('output').innerText = "I'm Perfect AI, Your Researcher, Now How Can I help You?";
+            } else if (query.startsWith('tell me a story')) {
+                generateStory(query);
             } else if (searchTerm) {
                 fetchWikipediaData(searchTerm, queryType);
             } else {
@@ -126,6 +130,32 @@
                 }
             }
             return sentences[0] + '.';
+        }
+
+        function generateStory(prompt) {
+            const headers = {
+                'Authorization': 'Bearer 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', // Replace with your actual API key
+                'Content-Type': 'application/json'
+            };
+
+            const body = JSON.stringify({
+                inputs: prompt
+            });
+
+            fetch('https://api-inference.huggingface.co/models/gpt2', {
+                method: 'POST',
+                headers: headers,
+                body: body
+            })
+            .then(response => response.json())
+            .then(data => {
+                const story = data[0]?.generated_text || 'Sorry, I couldn\'t generate a story this time.';
+                document.getElementById('output').innerText = story;
+            })
+            .catch(error => {
+                console.error('Error generating the story:', error);
+                document.getElementById('output').innerText = 'An error occurred while generating the story. Please try again.';
+            });
         }
     </script>
 
