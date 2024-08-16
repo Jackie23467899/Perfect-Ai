@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfet AI🤖</title>
+    <title>test AI🤖</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -59,7 +59,7 @@
 </head>
 <body>
 
-    <h1>Perfet AI🤖d</h1>
+    <h1>Perfet AI🤖</h1>
     <p>Enter a query starting with "What is," "Where is," "How about," "Who is," or "Tell me a story":</p>
 
     <input type="text" id="query" placeholder="Enter your query">
@@ -68,44 +68,23 @@
     <div id="output"></div>
 
     <script>
-        // Your corpus of text for generating stories
-        const storyCorpus = `
-            In a land far, far away, there was a kingdom where magic was common and adventure was abundant...
-            The forest was enchanted, and many travelers had come seeking its hidden treasures and ancient secrets...
-            ...
+        // Predefined story elements
+        const characters = ['a brave knight', 'a curious cat', 'an adventurous explorer', 'a wise old wizard'];
+        const settings = ['in a magical forest', 'in a bustling city', 'on a distant planet', 'in a hidden kingdom'];
+        const conflicts = ['was searching for a lost treasure', 'discovered a mysterious portal', 'was trapped in an ancient curse', 'needed to save the world'];
+        const resolutions = ['and found what they were looking for', 'and unlocked a great secret', 'and broke the curse', 'and became a hero'];
 
-            `;
-
-        // Simple Markov Chain generator
-        function markovChain(corpus, length) {
-            const words = corpus.split(/\s+/);
-            const wordMap = {};
-            words.forEach((word, index) => {
-                if (index < words.length - 1) {
-                    const nextWord = words[index + 1];
-                    if (!wordMap[word]) {
-                        wordMap[word] = [];
-                    }
-                    wordMap[word].push(nextWord);
-                }
-            });
-
-            let currentWord = 'Once';
-            let result = [currentWord];
-            while (result.length < length) {
-                const nextWords = wordMap[currentWord];
-                if (!nextWords) break;
-                currentWord = nextWords[Math.floor(Math.random() * nextWords.length)];
-                result.push(currentWord);
-            }
-            return result.join(' ');
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
         }
 
         function generateStory() {
-            // Generate a story with a fixed beginning
-            const fixedBeginning = "Once upon a time, ";
-            const generatedContent = markovChain(storyCorpus, 100); // Generate the rest of the story with 100 words
-            return fixedBeginning + generatedContent;
+            const character = getRandomElement(characters);
+            const setting = getRandomElement(settings);
+            const conflict = getRandomElement(conflicts);
+            const resolution = getRandomElement(resolutions);
+
+            return `Once upon a time, ${character} ${setting} ${conflict} ${resolution}.`;
         }
 
         async function handleQuery() {
